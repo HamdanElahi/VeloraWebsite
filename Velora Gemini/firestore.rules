@@ -1,0 +1,62 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Default Deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // --- Helpers ---
+    function isValidId(id) { return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$'); }
+    function incoming() { return request.resource.data; }
+    function existing() { return resource.data; }
+    function isSignedIn() { return request.auth != null; }
+    function isAdmin() { return isSignedIn() && exists(/databases/$(database)/documents/admins/$(request.auth.uid)); }
+    function isOwner(userId) { return isSignedIn() && request.auth.uid == userId; }
+
+    // --- Reservations ---
+    match /reservations/{reservationId} {
+      allow read: if isAdmin();
+      allow create: if isValidId(reservationId) && isValidReservation(incoming());
+      allow update: if isAdmin() && isValidReservation(incoming());
+      allow delete: if isAdmin();
+    }
+
+    function isValidReservation(data) {
+      return data.keys().hasAll(['name', 'phone', 'date', 'time', 'guests', 'seating', 'created_at'])
+        && data.keys().size() >= 7 && data.keys().size() <= 10
+        && data.name is string && data.name.size() > 0 && data.name.size() <= 100
+        && data.phone is string && data.phone.size() >= 5 && data.phone.size() <= 20
+        && data.date is string && data.date.matches('^\\d{4}-\\d{2}-\\d{2}$')
+        && data.time is string && data.time.matches('^\\d{2}:\\d{2}$')
+        && data.guests in ['Single', 'Couple', 'Family']
+        && data.seating in ['Indoor', 'Outdoor', 'Balcony']
+        && data.created_at == request.time
+        && (!('email' in data) || (data.email is string && data.email.size() <= 100))
+        && (!('special_request' in data) || (data.special_request is string && data.special_request.size() <= 500))
+        && (!('status' in data) || (data.status in ['pending', 'confirmed', 'cancelled']));
+    }
+
+    // --- Contacts ---
+    match /contacts/{contactId} {
+      allow read: if isAdmin();
+      allow create: if isValidId(contactId) && isValidContact(incoming());
+      allow delete: if isAdmin();
+    }
+
+    function isValidContact(data) {
+      return data.keys().hasAll(['name', 'email', 'message', 'created_at'])
+        && data.keys().size() == 4
+        && data.name is string && data.name.size() > 0 && data.name.size() <= 100
+        && data.email is string && data.email.matches('^[^@]+@[^@]+\\.[^@]+$')
+        && data.message is string && data.message.size() > 0 && data.message.size() <= 1000
+        && data.created_at == request.time;
+    }
+
+    // --- Admins ---
+    match /admins/{userId} {
+      allow read: if isSignedIn() && request.auth.uid == userId;
+      allow write: if false; // Only manageable via console or service account
+    }
+  }
+}

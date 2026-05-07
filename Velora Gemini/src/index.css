@@ -1,0 +1,40 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-serif: "Playfair Display", ui-serif, Georgia, serif;
+  
+  --color-gold: #D4AF37;
+  --color-gold-light: #F1D279;
+  --color-gold-dark: #A6862D;
+  --color-black-pure: #050505;
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+  
+  body {
+    @apply bg-black-pure text-white font-sans antialiased;
+  }
+
+  h1, h2, h3, h4, .font-display {
+    @apply font-serif;
+  }
+}
+
+@layer components {
+  .btn-gold {
+    @apply px-8 py-3 bg-gold text-black-pure font-semibold transition-all duration-300 hover:bg-gold-light active:scale-95;
+  }
+  
+  .btn-outline {
+    @apply px-8 py-3 border border-gold text-gold font-semibold transition-all duration-300 hover:bg-gold hover:text-black-pure active:scale-95;
+  }
+  
+  .input-field {
+    @apply w-full bg-white/5 border border-white/10 px-4 py-3 text-white focus:outline-none focus:border-gold transition-colors;
+  }
+}

@@ -1,0 +1,90 @@
+{
+  "entities": {
+    "Reservation": {
+      "title": "Reservation",
+      "description": "Table reservation details for Velora",
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Full name of the guest"
+        },
+        "phone": {
+          "type": "string",
+          "description": "Contact phone number"
+        },
+        "email": {
+          "type": "string",
+          "format": "email",
+          "description": "Optional email address"
+        },
+        "date": {
+          "type": "string",
+          "format": "date",
+          "description": "Reservation date (YYYY-MM-DD)"
+        },
+        "time": {
+          "type": "string",
+          "description": "Reservation time (HH:mm)"
+        },
+        "guests": {
+          "type": "string",
+          "enum": ["Single", "Couple", "Family"],
+          "description": "Number of guests category"
+        },
+        "seating": {
+          "type": "string",
+          "enum": ["Indoor", "Outdoor", "Balcony"],
+          "description": "Seating preference"
+        },
+        "special_request": {
+          "type": "string",
+          "description": "Any special requirements"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "When the reservation was created"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["pending", "confirmed", "cancelled"],
+          "description": "Current status of reservation"
+        }
+      },
+      "required": ["name", "phone", "date", "time", "guests", "seating", "created_at"]
+    },
+    "ContactMessage": {
+      "title": "Contact Message",
+      "description": "General inquiry message",
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "email": {
+          "type": "string",
+          "format": "email"
+        },
+        "message": {
+          "type": "string"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": ["name", "email", "message", "created_at"]
+    }
+  },
+  "firestore": {
+    "reservations/{reservationId}": {
+      "schema": "Reservation",
+      "description": "Collection of all table reservations"
+    },
+    "contacts/{contactId}": {
+      "schema": "ContactMessage",
+      "description": "Collection of contact form submissions"
+    }
+  }
+}
